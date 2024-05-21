@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  // url      = "mysql://root:bbyGrYhWYdclalpNmWwOcTnkxHcJisNK@monorail.proxy.rlwy.net:19404/railway"
+}
+
+model User {
+  id               Int               @id @default(autoincrement())
+  email            String            @unique
+  name             String
+  username         String            @unique
+  image            String?
+  dateOfBirth      DateTime          @db.Date
+  gender           String?
+  university       String?
+  password         String
+  otp              Int?
+  reminders        Reminder[]
+  posts            Post[]
+  comments         Comment[]
+  reportedPosts    ReportedPost[]
+  reportedComments ReportedComment[]
+  exams            Exam[]
+  results          Result[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model Reminder {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  title     String
+  date      DateTime @db.Date
+  time      DateTime @db.Time
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Post {
+  id            Int            @id @default(autoincrement())
+  userId        Int
+  description   String
+  attachment    String
+  user          User           @relation(fields: [userId], references: [id])
+  comments      Comment[]
+  reportedPosts ReportedPost[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Comment {
+  id               Int               @id @default(autoincrement())
+  userId           Int
+  postId           Int
+  description      String
+  user             User              @relation(fields: [userId], references: [id])
+  post             Post              @relation(fields: [postId], references: [id])
+  reportedComments ReportedComment[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model ReportedPost {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  postId      Int
+  description String?
+  user        User     @relation(fields: [userId], references: [id])
+  post        Post     @relation(fields: [postId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ReportedComment {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  commentId   Int
+  description String?
+  user        User     @relation(fields: [userId], references: [id])
+  comment     Comment  @relation(fields: [commentId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Exam {
+  id          Int           @id @default(autoincrement())
+  userId      Int
+  title       String
+  imageUrl    String
+  category    String
+  user        User          @relation(fields: [userId], references: [id])
+  examDetails ExamDetails[]
+  results     Result[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model ExamDetails {
+  id        Int      @id @default(autoincrement())
+  examId    Int
+  question  String
+  option1   String
+  option2   String
+  option3   String
+  option4   String
+  option5   String
+  key       String
+  exam      Exam     @relation(fields: [examId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Result {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  examId    Int
+  score     Int
+  correct   Int
+  wrong     Int
+  user      User     @relation(fields: [userId], references: [id])
+  exam      Exam     @relation(fields: [examId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
